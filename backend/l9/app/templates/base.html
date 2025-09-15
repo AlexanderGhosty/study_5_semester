@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title or "Lab09" }}</title>
+  <style>
+    body { font: 14px/1.4 system-ui, sans-serif; margin: 2rem; }
+    nav a { margin-right: 1rem; }
+    form { margin: 1rem 0; }
+    input, textarea { width: 320px; display: block; margin: .4rem 0; }
+    table { border-collapse: collapse; margin-top: 1rem; }
+    td, th { border: 1px solid #ddd; padding: .4rem .6rem; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/users">Users</a>
+  <a href="/posts">Posts</a>
+</nav>
+<hr>
+{% block content %}{% endblock %}
+</body>
+</html>

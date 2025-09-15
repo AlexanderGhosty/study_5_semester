@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Posts</h2>
+<a href="/posts/new">Create Post</a>
+<table>
+  <tr><th>ID</th><th>Title</th><th>User</th><th>Actions</th></tr>
+  {% for p in posts %}
+  <tr>
+    <td>{{p.Post.id}}</td>
+    <td>{{p.Post.title}}</td>
+    <td>{{p.User.username}}</td>
+    <td>
+      <a href="/posts/{{p.Post.id}}/edit">Edit</a>
+      <form action="/posts/{{p.Post.id}}/delete" method="post" style="display:inline">
+        <button type="submit" onclick="return confirm('Delete post?')">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
