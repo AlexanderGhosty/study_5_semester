@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AJAX Калькулятор (Flask)</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Калькулятор</h1>
+
+    <form id="calcForm">
+      <div class="row">
+        <label for="op">Операция</label>
+        <select id="op" name="op" required>
+          <optgroup label="Бинарные">
+            <option value="add">Сложение (a + b)</option>
+            <option value="sub">Вычитание (a − b)</option>
+            <option value="mul">Умножение (a × b)</option>
+            <option value="div">Деление (a ÷ b)</option>
+            <option value="pow">Возведение в степень (a^b)</option>
+            <option value="root">Корень n‑ой степени (√[b]{a})</option>
+          </optgroup>
+          <optgroup label="Унарные (угол в градусах)">
+            <option value="sin">sin(a)</option>
+            <option value="cos">cos(a)</option>
+            <option value="tan">tan(a)</option>
+            <option value="cot">cot(a)</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="op1">Первый операнд (a)</label>
+        <input id="op1" name="op1" type="text" inputmode="decimal" placeholder="Напр. 12.5" required />
+      </div>
+
+      <div class="row" id="op2Row">
+        <label for="op2">Второй операнд (b)</label>
+        <input id="op2" name="op2" type="text" inputmode="decimal" placeholder="Для унарных не требуется" />
+      </div>
+
+      <button type="submit">Вычислить</button>
+    </form>
+
+    <div id="result" class="result" aria-live="polite"></div>
+  </div>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>
