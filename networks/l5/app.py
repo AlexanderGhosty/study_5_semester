@@ -19,8 +19,8 @@ def api_calc():
     def parse_float(val, name):
         try:
             return float(val)
-        except Exception:
-            raise ValueError(f"Поле '{name}' должно быть числом")
+        except Exception as exc:
+            raise ValueError(f"Поле '{name}' должно быть числом") from exc
 
     # Какие операции бинарные, а какие унарные
     unary_ops = {'sin', 'cos', 'tan', 'cot'}
@@ -36,6 +36,7 @@ def api_calc():
         return jsonify(ok=False, error=str(e)), 400
 
     try:
+        result = None
         # Вычисления
         if op == 'add':
             result = a + b
@@ -60,7 +61,7 @@ def api_calc():
             n = int(b)
             if a < 0 and n % 2 == 0:
                 raise ValueError('Чётный корень из отрицательного числа не является вещественным')
-            # Корректная обработка отрицательных для нечётного n
+            # обработка отрицательных для нечётного n
             if a < 0 and n % 2 == 1:
                 result = -((-a) ** (1.0 / n))
             else:
@@ -87,15 +88,14 @@ def api_calc():
             raise ValueError('Неподдерживаемая операция')
 
         return jsonify(ok=True, result=result)
-
     except ZeroDivisionError as zde:
         return jsonify(ok=False, error=str(zde)), 400
     except ValueError as ve:
         return jsonify(ok=False, error=str(ve)), 400
-    except Exception:
+    except RuntimeError:
         return jsonify(ok=False, error='Внутренняя ошибка сервера'), 500
 
 
 if __name__ == '__main__':
-    # Запуск dev-сервера
+    # Запуск сервера
     app.run(debug=True)
