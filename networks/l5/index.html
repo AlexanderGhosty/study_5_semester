@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .operand2-group {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .operand2-group.hidden {
+            max-height: 0;
+            margin-bottom: 0;
+            opacity: 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #result {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        .success {
+            color: #27ae60;
+        }
+
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>Калькулятор</h1>
+        <form id="calculator-form">
+            <div class="form-group">
+                <label for="operand1">Первый операнд:</label>
+                <input type="number" id="operand1" name="operand1" step="any" required 
+                       placeholder="Введите число">
+            </div>
+
+            <div class="form-group">
+                <label for="operation">Операция:</label>
+                <select id="operation" name="operation" required>
+                    <option value="">Выберите операцию</option>
+                    <optgroup label="Арифметические операции">
+                        <option value="add">Сложение (+)</option>
+                        <option value="subtract">Вычитание (−)</option>
+                        <option value="multiply">Умножение (×)</option>
+                        <option value="divide">Деление (÷)</option>
+                        <option value="power">Возведение в степень (^)</option>
+                        <option value="root">Корень (√)</option>
+                    </optgroup>
+                    <optgroup label="Тригонометрические функции">
+                        <option value="sin">Синус (sin)</option>
+                        <option value="cos">Косинус (cos)</option>
+                        <option value="tan">Тангенс (tan)</option>
+                        <option value="cot">Котангенс (cot)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group operand2-group" id="operand2-group">
+                <label for="operand2" id="operand2-label">Второй операнд:</label>
+                <input type="number" id="operand2" name="operand2" step="any" 
+                       placeholder="Введите число">
+            </div>
+
+            <button type="submit" id="calculate-btn">
+                <span id="btn-text">Вычислить</span>
+            </button>
+        </form>
+
+        <div class="result-container">
+            <div class="result-label">Результат:</div>
+            <div id="result">Выберите операцию и введите данные</div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Унарные операции, которые не требуют второго операнда
+            const unaryOperations = ['sin', 'cos', 'tan', 'cot'];
+            
+            // Функция для управления видимостью второго операнда
+            function toggleOperand2Visibility() {
+                const operation = $("#operation").val();
+                const operand2Group = $("#operand2-group");
+                const operand2Input = $("#operand2");
+                const operand2Label = $("#operand2-label");
+                
+                if (unaryOperations.includes(operation)) {
+                    // Скрываем второй операнд для унарных операций
+                    operand2Group.addClass('hidden');
+                    operand2Input.removeAttr('required');
+                    operand2Input.val(''); // Очищаем значение
+                } else {
+                    // Показываем второй операнд для бинарных операций
+                    operand2Group.removeClass('hidden');
+                    
+                    // Устанавливаем специальные метки для разных операций
+                    switch(operation) {
+                        case 'power':
+                            operand2Label.text('Степень:');
+                            operand2Input.attr('placeholder', 'Введите степень');
+                            break;
+                        case 'root':
+                            operand2Label.text('Степень корня:');
+                            operand2Input.attr('placeholder', 'Введите степень корня (2 для √)');
+                            break;
+                        default:
+                            operand2Label.text('Второй операнд:');
+                            operand2Input.attr('placeholder', 'Введите число');
+                    }
+                    
+                    if (operation && operation !== '') {
+                        operand2Input.attr('required', true);
+                    }
+                }
+            }
+            
+            // Обработчик изменения операции
+            $("#operation").change(toggleOperand2Visibility);
+            
+            // Инициализация при загрузке страницы
+            toggleOperand2Visibility();
+
+            // Обработчик отправки формы
+            $("#calculator-form").submit(function (event) {
+                event.preventDefault();
+
+                // Проверяем, выбрана ли операция
+                const operation = $("#operation").val();
+                if (!operation) {
+                    showResult("Пожалуйста, выберите операцию", "error");
+                    return;
+                }
+
+                // Показываем состояние загрузки
+                showLoading(true);
+
+                // Сбор данных из формы
+                const operand1 = $("#operand1").val();
+                const operand2 = $("#operand2").val();
+
+                // Валидация для операций, требующих второй операнд
+                if (!unaryOperations.includes(operation) && !operand2) {
+                    showResult("Пожалуйста, введите второй операнд", "error");
+                    showLoading(false);
+                    return;
+                }
+
+                // AJAX-запрос
+                $.ajax({
+                    url: "http://127.0.0.1:5000/calculate",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        operand1: parseFloat(operand1),
+                        operation: operation,
+                        operand2: operand2 ? parseFloat(operand2) : null
+                    }),
+                    success: function (response) {
+                        showResult(formatResult(response.result), "success");
+                    },
+                    error: function (xhr) {
+                        const error = xhr.responseJSON?.error || "Произошла неизвестная ошибка";
+                        showResult("Ошибка: " + error, "error");
+                    },
+                    complete: function() {
+                        showLoading(false);
+                    }
+                });
+            });
+
+            // Функция для отображения результата
+            function showResult(text, type) {
+                const resultElement = $("#result");
+                resultElement.removeClass("error success").addClass(type);
+                resultElement.text(text);
+            }
+
+            // Функция для форматирования результата
+            function formatResult(result) {
+                if (typeof result === 'number') {
+                    // Округляем до 10 знаков после запятой для избежания проблем с плавающей точкой
+                    return Number(result.toPrecision(12)).toString();
+                }
+                return result;
+            }
+
+            // Функция для показа состояния загрузки
+            function showLoading(loading) {
+                const form = $("#calculator-form");
+                const btnText = $("#btn-text");
+                
+                if (loading) {
+                    form.addClass("loading");
+                    btnText.text("Вычисление...");
+                } else {
+                    form.removeClass("loading");
+                    btnText.text("Вычислить");
+                }
+            }
+
+            // Сброс сообщений об ошибках при вводе
+            $("#operand1, #operand2").on('input', function() {
+                const resultElement = $("#result");
+                if (resultElement.hasClass("error")) {
+                    showResult("Введите данные для вычисления", "");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

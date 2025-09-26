@@ -131,7 +131,6 @@ int main() {
         WSACleanup();
         return 1;
     }
-    std::cout << "Сервер запущен по адресу " << serverAddr.sin_addr.s_addr << "\n";
     std::cout << "Сервер запущен на порту " << PORT << ". Ожидание подключения...\n";
 
     // Обрабатываем клиентов в цикле
