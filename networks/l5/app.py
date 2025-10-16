@@ -98,4 +98,4 @@ def api_calc():
 
 if __name__ == '__main__':
     # Запуск сервера
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
